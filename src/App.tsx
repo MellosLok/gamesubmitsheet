@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { AppState, Game, UserStatus, GameType, GameStatus } from './types';
+import { AppState, BasicInfo, Game, UserStatus, GameType, GameStatus } from './types';
+import BasicInfoForm from './components/BasicInfoForm';
 import GameRegistrationForm from './components/GameRegistrationForm';
 import RegistrationComplete from './components/RegistrationComplete';
 import HeaderInfo from './components/HeaderInfo';
@@ -45,14 +46,17 @@ const mockGames: Game[] = [
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>({
+    basicInfo: null,
     selectedGame: null,
-    userStatus: UserStatus.NO_GAME_REGISTERED,
+    userStatus: UserStatus.NO_BASIC_INFO,
     games: mockGames
   });
 
   // 更新用户状态
   const updateUserStatus = () => {
-    if (!appState.selectedGame) {
+    if (!appState.basicInfo) {
+      setAppState(prev => ({ ...prev, userStatus: UserStatus.NO_BASIC_INFO }));
+    } else if (!appState.selectedGame) {
       setAppState(prev => ({ ...prev, userStatus: UserStatus.NO_GAME_REGISTERED }));
     } else {
       setAppState(prev => ({ ...prev, userStatus: UserStatus.GAME_REGISTERED }));
@@ -61,7 +65,16 @@ const App: React.FC = () => {
 
   useEffect(() => {
     updateUserStatus();
-  }, [appState.selectedGame]);
+  }, [appState.basicInfo, appState.selectedGame]);
+
+  // 处理基本报名信息提交
+  const handleBasicInfoSubmit = (basicInfo: BasicInfo) => {
+    setAppState(prev => ({
+      ...prev,
+      basicInfo,
+      userStatus: UserStatus.NO_GAME_REGISTERED
+    }));
+  };
 
   // 处理游戏登记
   const handleGameRegister = (game: Game, theme: string, description: string) => {
@@ -110,6 +123,13 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (appState.userStatus) {
+      case UserStatus.NO_BASIC_INFO:
+        return (
+          <BasicInfoForm
+            onSubmit={handleBasicInfoSubmit}
+          />
+        );
+
       case UserStatus.NO_GAME_REGISTERED:
         return (
           <GameRegistrationForm
@@ -144,12 +164,27 @@ const App: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-4">
             <div className={`flex items-center space-x-2 ${
+              appState.userStatus !== UserStatus.NO_BASIC_INFO ? 'text-blue-600' : 'text-gray-400'
+            }`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                appState.userStatus !== UserStatus.NO_BASIC_INFO ? 'bg-blue-600 text-white' : 'bg-gray-200'
+              }`}>
+                {appState.userStatus !== UserStatus.NO_BASIC_INFO ? '✓' : '1'}
+              </div>
+              <span className="text-sm font-medium">基本信息</span>
+            </div>
+            
+            <div className={`w-16 h-0.5 ${
+              appState.userStatus !== UserStatus.NO_BASIC_INFO ? 'bg-blue-600' : 'bg-gray-200'
+            }`}></div>
+            
+            <div className={`flex items-center space-x-2 ${
               appState.userStatus === UserStatus.GAME_REGISTERED ? 'text-blue-600' : 'text-gray-400'
             }`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                 appState.userStatus === UserStatus.GAME_REGISTERED ? 'bg-blue-600 text-white' : 'bg-gray-200'
               }`}>
-                {appState.userStatus === UserStatus.GAME_REGISTERED ? '✓' : '1'}
+                {appState.userStatus === UserStatus.GAME_REGISTERED ? '✓' : '2'}
               </div>
               <span className="text-sm font-medium">游戏登记</span>
             </div>

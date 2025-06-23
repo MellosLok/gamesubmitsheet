@@ -1,3 +1,9 @@
+// 基本报名信息类型
+export interface BasicInfo {
+  phone: string;
+  wechat: string;
+}
+
 // 游戏状态枚举
 export enum GameStatus {
   DRAFT = 'draft',           // 草稿
@@ -26,12 +32,14 @@ export interface Game {
 
 // 用户状态枚举
 export enum UserStatus {
-  NO_GAME_REGISTERED = 'no_game_registered', // 未登记游戏
+  NO_BASIC_INFO = 'no_basic_info',     // 未提交基本报名信息
+  NO_GAME_REGISTERED = 'no_game_registered', // 已提交基本信息，未登记游戏
   GAME_REGISTERED = 'game_registered'  // 已登记游戏
 }
 
 // 应用状态类型
 export interface AppState {
+  basicInfo: BasicInfo | null;
   selectedGame: Game | null;
   userStatus: UserStatus;
   games: Game[];
